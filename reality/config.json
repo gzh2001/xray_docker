@@ -90,14 +90,14 @@
     {
       "protocol": "wireguard",
       "settings": {
-        "secretKey": "2DZVxVxeIW+MuHV7ZaoMTM9OPJlY4odxlDZBbQAKyVY=",
+        "secretKey": "",
         "address": [
           "172.16.0.2/32",
           "2606:4700:110:8949:fed8:2642:a640:c8e1/128"
         ],
         "peers": [
           {
-            "publicKey": "bmXOC+F1FxEMF9dyiK2H5/1SUtzH0JuVo51h2wPfgyo=",
+            "publicKey": "",
             "endpoint": "engage.cloudflareclient.com:2408"
           }
         ]
