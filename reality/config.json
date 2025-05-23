@@ -6,11 +6,7 @@
   },
   "api": {
     "tag": "api",
-    "services": [
-      "HandlerService",
-      "LoggerService",
-      "StatsService"
-    ]
+    "services": ["HandlerService", "LoggerService", "StatsService"]
   },
   "stats": {},
   "policy": {
@@ -75,21 +71,14 @@
           "xver": 0,
           "maxTimeDiff": 0,
           "minClientVer": "",
-          "serverNames": [
-            "xx"
-          ],
+          "serverNames": ["xx"],
           "privateKey": "xx",
-          "shortIds": [
-            ""
-          ]
+          "shortIds": [""]
         }
       },
       "sniffing": {
         "enabled": true,
-        "destOverride": [
-          "http",
-          "tls"
-        ]
+        "destOverride": ["http", "tls"]
       }
     }
   ],
@@ -101,6 +90,24 @@
     {
       "protocol": "blackhole",
       "tag": "blocked"
+    },
+    {
+      "protocol": "wireguard",
+      "settings": {
+        "secretKey": "xx",
+        "address": [
+          "172.16.0.2/32",
+          "2606:4700:110:8949:fed8:2642:a640:c8e1/128"
+        ],
+        "peers": [
+          {
+            "publicKey": "xx",
+            "endpoint": "engage.cloudflareclient.com:2408"
+          }
+        ],
+        "reserved": [0, 0, 0]
+      },
+      "tag": "wireguard-1"
     }
   ],
   "routing": {
@@ -116,16 +123,12 @@
         "outboundTag": "blocked"
       },
       {
-        "inboundTag": [
-          "api"
-        ],
+        "inboundTag": ["api"],
         "outboundTag": "api",
         "type": "field"
       },
       {
-        "domain": [
-          "domain:byr.pt"
-        ],
+        "domain": ["domain:byr.pt"],
         "type": "field",
         "outboundTag": "direct"
       },
@@ -140,20 +143,24 @@
       },
       {
         "type": "field",
-        "ip": [
-          "geoip:cn",
-          "geoip:private"
-        ],
+        "ip": ["geoip:private"],
         "outboundTag": "blocked"
       },
       {
-        "protocol": [
-          "bittorrent"
-        ],
+        "type": "field",
+        "domain": ["geosite:cn"],
+        "outboundTag": "wireguard-1"
+      },
+      {
+        "type": "field",
+        "ip": ["geoip:cn"],
+        "outboundTag": "wireguard-1"
+      },
+      {
+        "protocol": ["bittorrent"],
         "type": "field",
         "outboundTag": "blocked"
       }
     ]
   }
 }
-
