@@ -3,25 +3,28 @@ name: xray_docker_reality
 on:
   workflow_dispatch:
   schedule:
-    - cron: '0 20 */2 * *'  # UTC 20:00  UTC+8 04:00
+    - cron: "0 20 */2 * *" # UTC 20:00  UTC+8 04:00
   push:
     paths:
-      - 'reality/Dockerfile'
-      - '.github/workflows/xray_docker_reality.yml'
-      - 'reality/entrypoint.sh'
-      - 'reality/config.json'
-      - 'reality/VERSION'
+      - "reality/Dockerfile"
+      - ".github/workflows/xray_docker_reality.yml"
+      - "reality/entrypoint.sh"
+      - "reality/config.json"
+      - "reality/VERSION"
   pull_request:
     paths:
-      - 'reality/Dockerfile'
-      - '.github/workflows/xray_docker_reality.yml'
-      - 'reality/entrypoint.sh'
-      - 'reality/config.json'
-      - 'reality/VERSION'
+      - "reality/Dockerfile"
+      - ".github/workflows/xray_docker_reality.yml"
+      - "reality/entrypoint.sh"
+      - "reality/config.json"
+      - "reality/VERSION"
 
 jobs:
   build:
     runs-on: ubuntu-22.04
+    permissions:
+      contents: read
+      packages: write # 允许推送到 GitHub Container Registry
     steps:
       - name: Checkout
         uses: actions/checkout@v4
@@ -32,22 +35,30 @@ jobs:
       - name: Set up QEMU
         uses: docker/setup-qemu-action@v3
 
-      - name: Docker Login
-        uses: docker/login-action@v3
-        with:
-          username: ${{ secrets.DOCKER_USERNAME }}
-          password: ${{ secrets.DOCKER_PASSWORD }}
-
-      - name: Extract first line of commit message
+      - name: Extract version info
         shell: bash
         run: |
           VERSION=$(cat reality/VERSION)
           echo "VERSION=$VERSION" >> $GITHUB_ENV
-
-      - name: Get latest Xray-core version (including pre-release)
-        run: |
           LATEST_VERSION=$(curl -s https://api.github.com/repos/XTLS/Xray-core/releases | jq -r '.[0].tag_name')
           echo "XRAY_VERSION=$LATEST_VERSION" >> $GITHUB_ENV
+
+      - name: Login to GHCR
+        uses: docker/login-action@v3
+        with:
+          registry: ghcr.io
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Prepare image tags
+        id: meta
+        run: |
+          IMAGE_NAME=ghcr.io/${{ github.repository_owner }}/xray_docker_reality
+          FULL_TAG_VERSION=$IMAGE_NAME:${VERSION}-ubuntu-22.04-xray-${XRAY_VERSION}
+          FULL_TAG_LATEST=$IMAGE_NAME:latest
+          echo "image_name=$IMAGE_NAME" >> $GITHUB_OUTPUT
+          echo "tag_version=$FULL_TAG_VERSION" >> $GITHUB_OUTPUT
+          echo "tag_latest=$FULL_TAG_LATEST" >> $GITHUB_OUTPUT
 
       - name: Build and push Docker image
         uses: docker/build-push-action@v4.0.0
@@ -55,7 +66,7 @@ jobs:
           context: ./reality
           file: ./reality/Dockerfile
           platforms: linux/amd64,linux/arm64,linux/arm/v7,linux/arm/v6
-          tags: |
-            wulabing/xray_docker_reality:${{env.VERSION}}-ubuntu-22.04-xray-${{env.XRAY_VERSION}}
-            wulabing/xray_docker_reality:latest
           push: true
+          tags: |
+            ${{ steps.meta.outputs.tag_version }}
+            ${{ steps.meta.outputs.tag_latest }}
